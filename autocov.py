@@ -8,7 +8,7 @@ import sys
 import re
 import shutil
 
-__version__ = '2016.02.20.2'
+__version__ = '2016.02.21'
 
 
 upload_cov_template = """
