@@ -6,20 +6,30 @@ import json
 from os import environ
 import sys
 
-__version__ = '2016.02.20.1'
+__version__ = '2016.02.20.2'
+
+
+upload_cov_template = """
+coverage html
+git clone --depth=1 --branch=gh-pages git@github.com:{owner}/{repo}.git gh-pages
+mkdir -p gh-pages/autocov
+mv htmlcov gh-pages/autocov/{commit}
+cd gh-pages
+git config user.name "Travis CI"
+git config user.email "{user}@travis"
+git add autocov
+git commit -m "auto cov {commit}"
+git push
+"""
 
 
 def upload_cov(owner, repo, commit, user):
-    os.system('coverage html')
-    os.system('git clone --depth=1 --branch=gh-pages git@github.com:%s/%s.git gh-pages' % (owner, repo))
-    os.system('mkdir -p gh-pages/autocov')
-    os.system('mv htmlcov gh-pages/autocov/%s' % commit)
-    os.system('cd gh-pages')
-    os.system('git config user.name "Travis CI"')
-    os.system('git config user.email "%s@travis"' % user)
-    os.system('git add ../autocov/')
-    os.system('git commit -m "auto cov %s"' % commit)
-    os.system('git push')
+    os.system(upload_cov_template.format(
+        owner=owner,
+        repo=repo,
+        commit=commit,
+        user=user
+    ))
 
 
 def update_github_status(auth, repo, status):
@@ -41,7 +51,7 @@ def auto_cov(user, token, cov_requirements=0):
     commit = environ['TRAVIS_COMMIT']
     owner, repo = environ['TRAVIS_REPO_SLUG'].split('/')
 
-    upload_cov(commit, owner, repo, user)
+    upload_cov(owner, repo, commit, user)
 
     url = "http://%s.github.io/%s/autocov/%s/" % (owner, repo, commit)
     result = 30
@@ -109,4 +119,6 @@ def main(argv=None):
     auto_cov(args.user, args.token, args.percent)
 
 if __name__ == '__main__':
-    sys.exit(main())
+    # sys.exit(main())
+    import clime
+    clime.start(debug=True)
