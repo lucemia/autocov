@@ -5,12 +5,13 @@ import os
 import json
 from os import environ
 import sys
+import re
+import shutil
 
 __version__ = '2016.02.20.2'
 
 
 upload_cov_template = """
-coverage html
 git clone --depth=1 --branch=gh-pages git@github.com:{owner}/{repo}.git gh-pages
 mkdir -p gh-pages/autocov
 mv htmlcov gh-pages/autocov/{commit}
@@ -23,13 +24,46 @@ git push
 """
 
 
-def upload_cov(owner, repo, commit, user):
-    os.system(upload_cov_template.format(
+def _shell(cmd):
+    # FIXME: os.system is not recommend and behavior different in windows system
+    # https://docs.python.org/2/library/os.html
+    assert os.system(cmd) == 0
+
+
+def generate_cov():
+    _shell('coverage html')
+    return 'htmlcov'
+
+
+def git_commit(owner, repo, commit, user, dest_folder, cov_folder):
+    _shell('git clone --depth=1 --branch=gh-pages git@github.com:{owner}/{repo}.git {dest}'.format(
         owner=owner,
         repo=repo,
-        commit=commit,
-        user=user
+        dest=dest_folder
     ))
+
+    if not os.path.exists('%s/autocov/%s' % (dest_folder, commit)):
+        shutil.move(cov_folder, '%s/autocov/%s' % (dest_folder, commit))
+
+        os.chdir('gh-pages')
+        _shell('git config user.name "%s"' % user)
+        _shell('git config user.email "%s@autocov"' % user)
+        _shell('git add autocov')
+        _shell('git commit -m "auto cov {commit}"'.format(commit=commit))
+        _shell('git push')
+        os.chdir('..')
+
+
+def gen_cov(owner, repo, commit, user, dest_folder):
+    cov_path = generate_cov()
+    pc_cov = re.compile(r'<span class="pc_cov">([\d]+)%</span>')
+
+    with open("%s/index.html" % cov_path) as ifile:
+        cov = int(pc_cov.findall(ifile.read())[0])
+
+    git_commit(owner, repo, commit, user, dest_folder, cov_path)
+
+    return cov
 
 
 def update_github_status(auth, repo, status):
@@ -44,22 +78,24 @@ def update_github_status(auth, repo, status):
         json.dumps(status),
         url
     )
-    return os.system(cmd)
+    assert os.system(cmd) == 0
 
 
 def auto_cov(user, token, cov_requirements=0):
     commit = environ['TRAVIS_COMMIT']
     owner, repo = environ['TRAVIS_REPO_SLUG'].split('/')
 
-    upload_cov(owner, repo, commit, user)
+    cov = gen_cov(owner, repo, commit, user, 'gh-pages')
 
     url = "http://%s.github.io/%s/autocov/%s/" % (owner, repo, commit)
-    result = 30
+    result = cov
 
     if result > cov_requirements:
         state = "success"
     else:
         state = "failure"
+
+    print state, result, cov_requirements
 
     status = {
         "state": state,
