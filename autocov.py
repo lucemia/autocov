@@ -119,6 +119,4 @@ def main(argv=None):
     auto_cov(args.user, args.token, args.percent)
 
 if __name__ == '__main__':
-    # sys.exit(main())
-    import clime
-    clime.start(debug=True)
+    sys.exit(main())
