@@ -6,14 +6,17 @@ import json
 from os import environ
 import sys
 
-__version__ = '2016.02.20'
+__version__ = '2016.02.20.1'
 
 
-def upload_cov(commit):
+def upload_cov(owner, repo, commit, user):
     os.system('coverage html')
-    os.system('mkdir -p ../autocov')
-    os.system('mv htmlcov ../autocov/%s' % commit)
-    os.system('git checkout gh-pages')
+    os.system('git clone --depth=1 --branch=gh-pages git@github.com:%s/%s.git gh-pages' % (owner, repo))
+    os.system('mkdir -p gh-pages/autocov')
+    os.system('mv htmlcov gh-pages/autocov/%s' % commit)
+    os.system('cd gh-pages')
+    os.system('git config user.name "Travis CI"')
+    os.system('git config user.email "%s@travis"' % user)
     os.system('git add ../autocov/')
     os.system('git commit -m "auto cov %s"' % commit)
     os.system('git push')
@@ -38,7 +41,7 @@ def auto_cov(user, token, cov_requirements=0):
     commit = environ['TRAVIS_COMMIT']
     owner, repo = environ['TRAVIS_REPO_SLUG'].split('/')
 
-    upload_cov(commit)
+    upload_cov(commit, owner, repo, user)
 
     url = "http://%s.github.io/%s/autocov/%s/" % (owner, repo, commit)
     result = 30

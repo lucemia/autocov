@@ -33,7 +33,7 @@ with io.open('README.rst') as readme:
     setup(
         name='autocov',
         version=version(),
-        description="A tool that automatically generate coverage report',
+        description="A tool that automatically generate coverage report",
         long_description=readme.read(),
         # license='Expat License',
         # author='Hideo Hattori',
