@@ -8,20 +8,7 @@ import sys
 import re
 import shutil
 
-__version__ = '2016.02.21'
-
-
-upload_cov_template = """
-git clone --depth=1 --branch=gh-pages git@github.com:{owner}/{repo}.git gh-pages
-mkdir -p gh-pages/autocov
-mv htmlcov gh-pages/autocov/{commit}
-cd gh-pages
-git config user.name "Travis CI"
-git config user.email "{user}@travis"
-git add autocov
-git commit -m "auto cov {commit}"
-git push
-"""
+__version__ = '2016.02.21.1'
 
 
 def _shell(cmd):
@@ -90,7 +77,7 @@ def auto_cov(user, token, cov_requirements=0):
     url = "http://%s.github.io/%s/autocov/%s/" % (owner, repo, commit)
     result = cov
 
-    if result > cov_requirements:
+    if result >= cov_requirements:
         state = "success"
     else:
         state = "failure"
