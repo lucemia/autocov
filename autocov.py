@@ -9,7 +9,7 @@ import re
 import shutil
 import time
 
-__version__ = '2016.03.15.1'
+__version__ = '2016.03.15.3'
 
 
 def _shell(cmd):
@@ -41,6 +41,7 @@ def git_commit(owner, repo, commit, user, dest_folder, cov_folder):
 
         for i in range(3):
             try:
+                _shell('git pull')
                 _shell('git push')
                 break
             except:
