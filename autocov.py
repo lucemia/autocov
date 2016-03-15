@@ -7,8 +7,9 @@ from os import environ
 import sys
 import re
 import shutil
+import time
 
-__version__ = '2016.02.21.1'
+__version__ = '2016.03.15.1'
 
 
 def _shell(cmd):
@@ -37,7 +38,15 @@ def git_commit(owner, repo, commit, user, dest_folder, cov_folder):
         _shell('git config user.email "%s@autocov"' % user)
         _shell('git add autocov')
         _shell('git commit -m "auto cov {commit}"'.format(commit=commit))
-        _shell('git push')
+
+        for i in range(3):
+            try:
+                _shell('git push')
+                break
+            except:
+                time.sleep(10)
+                pass
+
         os.chdir('..')
 
 
