@@ -23,10 +23,12 @@ INSTALL_REQUIRES = (
 
 def version():
     """Return version string."""
+    from datetime import datetime
+    __version__ = datetime.utcnow().strftime('%Y.%m.%d.%H')
+
     with io.open('autocov.py') as input_file:
         for line in input_file:
-            if line.startswith('__version__'):
-                return ast.parse(line).body[0].value.s
+            return __version__
 
 
 with io.open('README.rst') as readme:
