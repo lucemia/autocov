@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 import os
 import json
 from os import environ
@@ -8,8 +7,9 @@ import sys
 import re
 import shutil
 import time
+from datetime import datetime
 
-__version__ = '2016.03.15.3'
+__version__ = datetime.utcnow().strftime('%Y.%m.%d.%H')
 
 
 def _shell(cmd):
