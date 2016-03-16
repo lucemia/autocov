@@ -84,7 +84,7 @@ def auto_cov(user, token, cov_requirements=0):
     commit = environ['TRAVIS_COMMIT']
     owner, repo = environ['TRAVIS_REPO_SLUG'].split('/')
 
-    cov = gen_cov(owner, repo, commit, user, token, 'gh-pages', token)
+    cov = gen_cov(owner, repo, commit, user, token, 'gh-pages')
 
     url = "http://%s.github.io/%s/autocov/%s/" % (owner, repo, commit)
     result = cov
