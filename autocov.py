@@ -23,8 +23,10 @@ def generate_cov():
     return 'htmlcov'
 
 
-def git_commit(owner, repo, commit, user, dest_folder, cov_folder):
-    _shell('git clone --depth=1 --branch=gh-pages git@github.com:{owner}/{repo}.git {dest}'.format(
+def git_commit(owner, repo, commit, user, token, dest_folder, cov_folder):
+    _shell('git clone --depth=1 --branch=gh-pages https://{user}:{token}@github.com/{owner}/{repo}.git {dest}'.format(
+        user=user,
+        token=token
         owner=owner,
         repo=repo,
         dest=dest_folder
@@ -51,14 +53,14 @@ def git_commit(owner, repo, commit, user, dest_folder, cov_folder):
         os.chdir('..')
 
 
-def gen_cov(owner, repo, commit, user, dest_folder):
+def gen_cov(owner, repo, commit, user, token, dest_folder):
     cov_path = generate_cov()
     pc_cov = re.compile(r'<span class="pc_cov">([\d]+)%</span>')
 
     with open("%s/index.html" % cov_path) as ifile:
         cov = int(pc_cov.findall(ifile.read())[0])
 
-    git_commit(owner, repo, commit, user, dest_folder, cov_path)
+    git_commit(owner, repo, commit, user, token, dest_folder, cov_path)
 
     return cov
 
@@ -82,7 +84,7 @@ def auto_cov(user, token, cov_requirements=0):
     commit = environ['TRAVIS_COMMIT']
     owner, repo = environ['TRAVIS_REPO_SLUG'].split('/')
 
-    cov = gen_cov(owner, repo, commit, user, 'gh-pages')
+    cov = gen_cov(owner, repo, commit, user, token, 'gh-pages')
 
     url = "http://%s.github.io/%s/autocov/%s/" % (owner, repo, commit)
     result = cov
