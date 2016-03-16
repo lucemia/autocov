@@ -9,8 +9,6 @@ import shutil
 import time
 from datetime import datetime
 
-__version__ = datetime.utcnow().strftime('%Y.%m.%d.%H')
-
 
 def _shell(cmd):
     # FIXME: os.system is not recommend and behavior different in windows system
@@ -26,7 +24,7 @@ def generate_cov():
 def git_commit(owner, repo, commit, user, token, dest_folder, cov_folder):
     _shell('git clone --depth=1 --branch=gh-pages https://{user}:{token}@github.com/{owner}/{repo}.git {dest}'.format(
         user=user,
-        token=token
+        token=token,
         owner=owner,
         repo=repo,
         dest=dest_folder
