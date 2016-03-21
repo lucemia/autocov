@@ -79,7 +79,10 @@ def update_github_status(auth, repo, status):
 
 
 def auto_cov(user, token, cov_requirements=0):
-    commit = environ['TRAVIS_COMMIT']
+    try:
+        commit = environ['TRAVIS_COMMIT_RANGE'][-40:]
+    except:
+        commit = environ['TRAVIS_COMMIT']
     owner, repo = environ['TRAVIS_REPO_SLUG'].split('/')
 
     cov = gen_cov(owner, repo, commit, user, token, 'gh-pages')
